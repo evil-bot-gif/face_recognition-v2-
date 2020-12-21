@@ -1,9 +1,11 @@
 import face_recognition as fr
 import cv2 
 import pickle
+import os
 import math
 import csv
 import numpy as np
+from datetime import datetime
 import time 
 
 from face_recognition.api import face_distance, face_encodings 
@@ -28,8 +30,8 @@ def Attendance(name):
             ent = data.split(',')
             names.append(ent[0])
         if name not in names:
-            curr = time.datetime.now()
-            dt = curr.strftime('%H:%M:%S')
+            curr = datetime.now()
+            dt = curr.strftime('%d/%b/%Y, %H:%M:%S')
             f.writelines(f'\n{name},{dt}')
 
 
@@ -59,6 +61,7 @@ if not cam.isOpened():
 
 while True:
     # Read every frame 
+    face_names = []
     ret , frame = cam.read()
     frameSmall = cv2.resize(frame,(0,0),fx=0.33,fy=0.33)
     frameRGB = cv2.cvtColor(frameSmall,cv2.COLOR_BGR2RGB)
@@ -68,11 +71,8 @@ while True:
     prev_frame_time = new_frame_time 
     # Display FPS at the Screen
     cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
-    # Display the number of known faces detected
-    cv2.putText(frame, f'Known_detected:{len(detected_name_list)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
     facePositions = fr.face_locations(frameRGB, model = MODEL)
     allEncoding = fr.face_encodings(frameRGB,facePositions)
-    face_names = []
     # json_to_export = {} 
     acc = 100.0
     for face_encoding in allEncoding:
@@ -84,6 +84,8 @@ while True:
         best_match_index = np.argmin(face_distances)
         # Name of the best match face
         name = Names[best_match_index]
+
+        Attendance(name)
         # Euclidean distance of best match index 
         Euclidean_dist_best_match = face_distances[best_match_index]
         # Calculate accuracy of the detection
@@ -97,16 +99,18 @@ while True:
                 detected_name_list.append(name)
             print(detected_name_list)
             face_names.append(name)
+        # Display the number of known faces detected
+        cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
             # append the time, name and date of the detected_name_list face to a json dict
             # json_to_export['Name'] = name
             # json_to_export['Time'] = f'{time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}'
             # json_to_export['Date'] = f'{time.localtime().tm_year}-{time.localtime().tm_mon}-{time.localtime().tm_mday}'
             # Write the information of the detected_name_list face into a csv
-            with open(f'Attendance/{name.title()}_{time.localtime().tm_year}-{time.localtime().tm_mon}-{time.localtime().tm_mday}_attendance.csv',mode='w') as csv_file:
-                    fieldnames = ['Name','Time','Date']
-                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                    writer.writeheader()
-                    writer.writerow({'Name': name.title() , 'Time': f'{time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}', 'Date' : f'{time.localtime().tm_year}-{time.localtime().tm_mon}-{time.localtime().tm_mday}'})
+            # with open(f'Attendance/{name.title()}_{time.localtime().tm_year}-{time.localtime().tm_mon}-{time.localtime().tm_mday}_attendance.csv',mode='w') as csv_file:
+            #         fieldnames = ['Name','Time','Date']
+            #         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            #         writer.writeheader()
+            #         writer.writerow({'Name': name.title() , 'Time': f'{time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}', 'Date' : f'{time.localtime().tm_year}-{time.localtime().tm_mon}-{time.localtime().tm_mday}'})
 
     # Draw the bounding boxes around the identified faces
     for (top,right,bottom,left), name in zip(facePositions,face_names):
