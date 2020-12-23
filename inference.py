@@ -40,7 +40,7 @@ Encodings = []
 Names = []
 detected_name_list =[]
 font = cv2.FONT_HERSHEY_DUPLEX
-MODEL = 'cnn' 
+MODEL = 'hog' 
 
 # used to record the time when we processed last frame 
 prev_frame_time = 0
