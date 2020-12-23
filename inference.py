@@ -41,6 +41,8 @@ Names = []
 detected_name_list =[]
 font = cv2.FONT_HERSHEY_DUPLEX
 MODEL = 'hog' 
+GSTREAMER_IP = 'rtspsrc location=rtsp://192.168.0.238:8080/h264_ulaw.sdp ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert ! appsink '
+GSTREAMER_CSI = 'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method=0 ! video/x-raw, width=720, height=480, format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
 
 # used to record the time when we processed last frame 
 prev_frame_time = 0
@@ -65,12 +67,12 @@ while True:
     ret , frame = cam.read()
     frameSmall = cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
     frameRGB = cv2.cvtColor(frameSmall,cv2.COLOR_BGR2RGB)
-    # # Calculate fps
-    # new_frame_time = time.time()   
-    # fps = 1/(new_frame_time-prev_frame_time) 
-    # prev_frame_time = new_frame_time 
-    # # Display FPS at the Screen
-    # cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
+    # Calculate fps
+    new_frame_time = time.time()   
+    fps = 1/(new_frame_time-prev_frame_time) 
+    prev_frame_time = new_frame_time 
+    # Display FPS at the Screen
+    cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
     facePositions = fr.face_locations(frameRGB, model = MODEL)
     allEncoding = fr.face_encodings(frameRGB,facePositions)
     for face_encoding in allEncoding:
@@ -85,10 +87,10 @@ while True:
         Attendance(name)
         # Euclidean distance of best match index 
         Euclidean_dist_best_match = face_distances[best_match_index]
-        # Calculate accuracy of the detection
-        conf = face_distance_to_conf(Euclidean_dist_best_match)
-        acc = conf * 100
-        print(acc)
+        # # Calculate accuracy of the detection
+        # conf = face_distance_to_conf(Euclidean_dist_best_match)
+        # acc = conf * 100
+        # print(acc)
         # record the attendance of the best_match face
         if matches[best_match_index]:
             # store an instance of the name of detected known face into a list
@@ -96,8 +98,8 @@ while True:
                 detected_name_list.append(name)
             print(detected_name_list)
             face_names.append(name)
-        # Display the number of known faces detected
-        cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
+    # Display the number of known faces detected
+    cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
     # Draw the bounding boxes around the identified faces
     for (top,right,bottom,left), name in zip(facePositions,face_names):
         top *= 4
