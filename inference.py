@@ -94,10 +94,8 @@ while True:
         print(acc)
         # record the attendance of the best_match face
         if matches[best_match_index]:
-            # store an instance of the name of detected known face into a list
-            if name not in detected_name_list:
-                detected_name_list.append(name)
-            print(detected_name_list)
+            name = Names[best_match_index]
+            print(name)
             face_names.append(name)
         # Display the number of known faces detected
         cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
