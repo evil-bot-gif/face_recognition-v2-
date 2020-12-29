@@ -14,11 +14,14 @@ for name in os.listdir(KNOWN_FACES_DIR):
     for filename in os.listdir(f"{KNOWN_FACES_DIR}/{name}"):
         print(filename)
         image = fr.load_image_file(f"{KNOWN_FACES_DIR}/{name}/{filename}")
-        # Encode the first face found in image
-        encoding = fr.face_encodings(image)[0]
-        print(encoding)
-        known_faces_encoding.append(encoding)
-        known_faces_name.append(name)
+        # Check if face encoding is valid, then append the list of names and encoding of the first face
+        encoding = fr.face_encodings(image)
+        if len(encoding)>0:
+            known_faces_encoding.append(encoding[0])
+            known_faces_name.append(name)
+            print("Face found! \n")
+        else:
+            print('No face found in the image!\n')
 print(known_faces_name)
 
 # Save the training data as PKL file

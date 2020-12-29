@@ -55,7 +55,7 @@ with open('known_faces_feature.pkl','rb') as f:
     Names= pickle.load(f)
 
 # create a cam instance 
-cam = cv2.VideoCapture('https://192.168.0.238:8080/video') # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
+cam = cv2.VideoCapture(0) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 # check if the camera is open
 if not cam.isOpened():
     print("Cannot open camera")
@@ -65,6 +65,10 @@ while True:
     # Read every frame 
     face_names = []
     ret , frame = cam.read()
+    # if the frame is not grabbed, then we reach the end of stream
+    if not ret:
+        break
+
     frameSmall = cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
     frameRGB = cv2.cvtColor(frameSmall,cv2.COLOR_BGR2RGB)
     # Calculate fps
@@ -115,7 +119,8 @@ while True:
     # Output the frame 
     cv2.imshow('Live Video',frame)
     cv2.moveWindow('Live Video',0,0)
-    if cv2.waitKey(1) == ord('q'):
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
         break
 # print(attendance)
 cam.release()
