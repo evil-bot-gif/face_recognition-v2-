@@ -22,11 +22,11 @@ for name in os.listdir(KNOWN_FACES_DIR):
             print("Face found! \n")
         else:
             print('No face found in the image!\n')
-print(known_faces_name)
-
+print('[INFO] Finished Training ......')
+print('[INFO] Serialize Encodings into pickle file ........')
 # Save the training data as PKL file
 # A PKL file is a file created by pickle, a Python module that enables objects to be serialized to files on disk and deserialized back into the program at runtime.
 with open('known_faces_feature.pkl','wb') as f:
     pickle.dump(known_faces_encoding,f)
     pickle.dump(known_faces_name,f)
-
+print('[INFO] Complete .......')

@@ -57,7 +57,7 @@ with open('known_faces_feature.pkl','rb') as f:
     Names= pickle.load(f)
 
 # create a cam instance 
-cam = cv2.VideoCapture(GSTREAMER_TEST,cv2.CAP_GSTREAMER) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
+cam = cv2.VideoCapture(0) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 
 # check if the camera is open
 if not cam.isOpened():
@@ -92,21 +92,18 @@ while True:
         # Take the best one
         best_match_index = np.argmin(face_distances)
         # Name of the best match face
-        name = Names[best_match_index]
-        Attendance(name)
+        # name = Names[best_match_index]
+        # Attendance(name)
         # Euclidean distance of best match index 
-        Euclidean_dist_best_match = face_distances[best_match_index]
+        # Euclidean_dist_best_match = face_distances[best_match_index]
         # # Calculate accuracy of the detection
         # conf = face_distance_to_conf(Euclidean_dist_best_match)
         # acc = conf * 100
         # print(acc)
         # record the attendance of the best_match face
         if matches[best_match_index]:
-            # store an instance of the name of detected known face into a list
-            if name not in detected_name_list:
-                detected_name_list.append(name)
-            print(detected_name_list)
-            face_names.append(name)
+            name = Names[best_match_index]
+        face_names.append(name)
     # Display the number of known faces detected
     cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
     # Draw the bounding boxes around the identified faces
