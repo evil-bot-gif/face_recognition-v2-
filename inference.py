@@ -12,7 +12,7 @@ from face_recognition.api import face_distance, face_encodings
 
 """---------------Functions-----------------"""
 # Function that provides confidence level based on euclidean distance
-def face_distance_to_conf(face_distance, face_match_threshold=0.6):
+def face_distance_to_conf(face_distance, face_match_threshold=0.5):
     if face_distance > face_match_threshold:
         range = (1.0 - face_match_threshold)
         linear_val = (1.0 - face_distance) / (range * 2.0)
@@ -38,7 +38,6 @@ def Attendance(name):
 """------------Code-------------"""
 Encodings = []
 Names = []
-detected_name_list =[]
 font = cv2.FONT_HERSHEY_DUPLEX
 MODEL = 'CNN' 
 TOLERANCE = 0.5
@@ -79,7 +78,7 @@ while True:
     fps = 1/(new_frame_time-prev_frame_time) 
     prev_frame_time = new_frame_time 
     # Display FPS at the Screen
-    cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
+    cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
 
     
     frameSmall = cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
@@ -89,6 +88,7 @@ while True:
     for face_encoding in allEncoding:
         matches = fr.compare_faces(Encodings,face_encoding,tolerance = TOLERANCE)
         name = "Unknown"
+        acc =100
         # check the known faces with the smallest distance to the new face
         face_distances = fr.face_distance(Encodings,face_encoding)
         # Take the best one
@@ -97,18 +97,16 @@ while True:
         # name = Names[best_match_index]
         # Attendance(name)
         # Euclidean distance of best match index 
-        # Euclidean_dist_best_match = face_distances[best_match_index]
-        # # Calculate accuracy of the detection
-        # conf = face_distance_to_conf(Euclidean_dist_best_match)
-        # acc = conf * 100
-        # print(acc)
-        # record the attendance of the best_match face
+        Euclidean_dist_best_match = face_distances[best_match_index]
         if matches[best_match_index]:
             name = Names[best_match_index]
             known_face_names.append(name)
+            # Calculate accuracy of face detection
+            conf = face_distance_to_conf(Euclidean_dist_best_match)
+            acc = conf * 100
         face_names.append(name)
     # Display the number of known faces detected
-    cv2.putText(frame, f'Known_detected:{len(known_face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
+    cv2.putText(frame, f'Known_detected:{len(known_face_names)}', (500, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
     # Draw the bounding boxes around the identified faces
     for (top,right,bottom,left), name in zip(facePositions,face_names):
         top *= 4
@@ -119,8 +117,8 @@ while True:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         y = top - 15 if top -15 > 15 else top + 15
         cv2.putText(frame,name.title(),(left,y),font,0.5,(0,255,0),2)
-        # # display the acc the accuracy 
-        # cv2.putText(frame, f'{round(acc,1)}%', (right, y), font, 0.5, (0, 255, 0), 2)
+        # display the acc the accuracy 
+        cv2.putText(frame, f'{round(acc,1)}%', (right, y), font, 0.5, (0, 255, 0), 2)
     # Output the frame 
     cv2.imshow('Live Video',frame)
     cv2.moveWindow('Live Video',0,0)
