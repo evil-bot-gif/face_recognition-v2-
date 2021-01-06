@@ -40,11 +40,12 @@ Encodings = []
 Names = []
 detected_name_list =[]
 font = cv2.FONT_HERSHEY_DUPLEX
-MODEL = 'hog' 
-GSTREAMER_IP = 'rtspsrc location=rtsp://192.168.0.238:8080/h264_pcm.sdp ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert! appsink '
-GSTREAMER_CSI = 'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method=0 ! video/x-raw, width=720, height=480, format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
-GSTREAMER_TEST = "rtspsrc location=rtsp://192.168.43.1:18888/h264_pcm.sdp lateny = 30 ! decodebin ! format=(String)NV12! nvvidconv ! appsink"
-FFMPEG = 'ffmpeg -rtsp_flags listen -i rtsp://192.168.43.1:18888/h264_pcm.sdp output'
+MODEL = 'CNN' 
+TOLERANCE = 0.5
+# GSTREAMER_IP = 'rtspsrc location=rtsp://192.168.0.238:8080/h264_pcm.sdp ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert! appsink '
+# GSTREAMER_CSI = 'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method=0 ! video/x-raw, width=720, height=480, format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
+# GSTREAMER_TEST = "rtspsrc location=rtsp://192.168.43.1:18888/h264_pcm.sdp lateny = 30 ! decodebin ! format=(String)NV12! nvvidconv ! appsink"
+# FFMPEG = 'ffmpeg -rtsp_flags listen -i rtsp://192.168.43.1:18888/h264_pcm.sdp output'
 
 # used to record the time when we processed last frame 
 prev_frame_time = 0
@@ -57,7 +58,7 @@ with open('known_faces_feature.pkl','rb') as f:
     Names= pickle.load(f)
 
 # create a cam instance 
-cam = cv2.VideoCapture(0) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
+cam = cv2.VideoCapture('http://192.168.0.238:8080/video') # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 
 # check if the camera is open
 if not cam.isOpened():
@@ -66,6 +67,7 @@ if not cam.isOpened():
 
 while True:
     # Read every frame 
+    known_face_names = []
     face_names = []
     ret , frame = cam.read()
     # if the frame is not grabbed, then we reach the end of stream
@@ -85,8 +87,8 @@ while True:
     facePositions = fr.face_locations(frameRGB, model = MODEL)
     allEncoding = fr.face_encodings(frameRGB,facePositions)
     for face_encoding in allEncoding:
-        matches = fr.compare_faces(Encodings,face_encoding)
-        name = 'Unknown'
+        matches = fr.compare_faces(Encodings,face_encoding,tolerance = TOLERANCE)
+        name = "Unknown"
         # check the known faces with the smallest distance to the new face
         face_distances = fr.face_distance(Encodings,face_encoding)
         # Take the best one
@@ -103,9 +105,10 @@ while True:
         # record the attendance of the best_match face
         if matches[best_match_index]:
             name = Names[best_match_index]
+            known_face_names.append(name)
         face_names.append(name)
     # Display the number of known faces detected
-    cv2.putText(frame, f'Known_detected:{len(face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
+    cv2.putText(frame, f'Known_detected:{len(known_face_names)}', (340, 40), font, 1, (0, 255, 0), 2, cv2.FILLED)
     # Draw the bounding boxes around the identified faces
     for (top,right,bottom,left), name in zip(facePositions,face_names):
         top *= 4
