@@ -24,50 +24,42 @@ class Window(Frame):
         s = Entry(self,width=30,font=("Arial",10))
         s.pack(pady=3)
         s.insert(0,"URL e.g.https://192.168.0.238/video")
+
 ############# Row 2 ###################
         # Step 1 instruction label 
-        text1 = Label(self,text="Enter name of face image dataset to build, face detection model to use (either cnn or hog), and press 'Build Image Dataset' button to start collecting images with IP camera.",fg='Red',font=("Helvetica",10))
+        text1 = Label(self,text="Enter name of face image dataset to build and press 'Build Image Dataset' button to start collecting images with IP camera devices.",fg='Red',font=("Helvetica",10))
         text1.pack(pady=3)
 
 ############# Row 3 ###################
         # Label beside name input text field
         name_label = Label(self,text="(Required) Name:",font=("Arial",10))
-        name_label.place(x=340,y=120)
+        name_label.place(x=345,y=120)
         # Input field for user to enter the path 
         n = Entry(self,width=25,font=("Arial",10))
         n.pack(pady=3)
         n.insert(0,"e.g.xaiver_lim(replace ' ' to '_')")
 
-############# Row 4 ###################
-        # Label beside model input text field
-        model_label = Label(self,text="(Optional) Model:",font=("Arial",10))
-        model_label.place(x=340,y=145)
-        # Input field for choosing face detection model 
-        m = Entry(self,width=25,font=("Arial",10))
-        m.pack(pady=3)
-        m.insert(0,"default:hog")
-
-############# Row 5 ###################        
+############# Row 4 ###################        
         # Button to run build_face_dataset script
-        btn = Button(self, text="Build Image Dataset", bg='red', fg='white',command=lambda:dataset(n.get(),m.get(),s.get()))
+        btn = Button(self, text="Build Image Dataset", bg='red', fg='white',command= lambda:dataset(n.get(),s.get()))
         btn.pack(pady=3)
 
-############# Row 6 ###################
+############# Row 5 ###################
         # Step 2 instruction label 
         text2 = Label(self,text="Retrain the model with newly created dataset by pressing 'Train Model' button.",fg='Red',font=("Helvetica",10))
         text2.pack(pady=3)
 
-############# Row 7 ###################
+############# Row 6 ###################
         # Button to run train_model script
         btn1 = Button(self,text='Train Model', bg="red",fg="white",command=training)
         btn1.pack(pady=3)
 
-############# Row 8 ###################
+############# Row 7 ###################
         # Step 3 instruction label
         text3 = Label(self,text="Press the 'Run Inference' button to run face recognition.",fg='Red',font=("Helvetica",10))
         text3.pack(pady=3)
 
-############# Row 9 ###################
+############# Row 8 ###################
         # Button to run inference script
         btn2 = Button(self, text="Run Inference", bg="red", fg="white",command=lambda:inference(s.get()))
         btn2.pack(pady=3)
@@ -79,11 +71,9 @@ def inference(src):
 def training():
     os.system('Train_model.py')
 
-def dataset(name,model,src):
-    if model == "":
-        os.system(f'build_face_dataset.py -o known_faces/{name} -i "{src}"')
-    else:
-        os.system(f'build_face_dataset.py -o known_faces/{name} -d {model} -i "{src}"')
+def dataset(name,src):
+    os.system(f'build_face_dataset.py -o known_faces/{name} -i "{src}"')
+
 
 
 root = Tk()

@@ -1,14 +1,13 @@
 import face_recognition as fr
 import cv2 
 import pickle
+import argparse
 import os
 import math
 import csv
 import numpy as np
 from datetime import datetime
 import time 
-
-from face_recognition.api import face_distance, face_encodings 
 
 """---------------Functions-----------------"""
 # Function that provides confidence level based on euclidean distance
@@ -36,38 +35,48 @@ def Attendance(name):
 
 
 """------------Code-------------"""
+## Global variables
 Encodings = []
 Names = []
+# Font for text display on screen during run time
 font = cv2.FONT_HERSHEY_DUPLEX
-MODEL = 'CNN' 
+# Face detection model (CNN or hog) used by face recognition api
+MODEL = 'hog' 
+# Tune accuracy of face recognition api
 TOLERANCE = 0.5
-# GSTREAMER_IP = 'rtspsrc location=rtsp://192.168.0.238:8080/h264_pcm.sdp ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert! appsink '
-# GSTREAMER_CSI = 'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method=0 ! video/x-raw, width=720, height=480, format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
-# GSTREAMER_TEST = "rtspsrc location=rtsp://192.168.43.1:18888/h264_pcm.sdp lateny = 30 ! decodebin ! format=(String)NV12! nvvidconv ! appsink"
-# FFMPEG = 'ffmpeg -rtsp_flags listen -i rtsp://192.168.43.1:18888/h264_pcm.sdp output'
-
 # used to record the time when we processed last frame 
 prev_frame_time = 0
-  
 # used to record the time at which we processed current frame 
 new_frame_time = 0
 
+"""------------Main program--------------"""
+# Construct argparse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--input", required=True,
+	help="video src url or onboard camera")
+args = vars(ap.parse_args())
+
+# Load trained data
 with open('known_faces_feature.pkl','rb') as f:
     Encodings = pickle.load(f)
     Names= pickle.load(f)
 
+print('[INFO] starting video stream ......')
 # create a cam instance 
-cam = cv2.VideoCapture('http://192.168.0.238:8080/video') # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
-
+cam = cv2.VideoCapture(args["input"]) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 # check if the camera is open
 if not cam.isOpened():
     print("Cannot open camera")
     exit()
 
+# Instruction to quit program
+print('[INFO] Press q to quit the program ........' )
+
 while True:
-    # Read every frame 
+    # Local variables
     known_face_names = []
     face_names = []
+    # Read every frame 
     ret , frame = cam.read()
     # if the frame is not grabbed, then we reach the end of stream
     if not ret:
@@ -80,33 +89,42 @@ while True:
     # Display FPS at the Screen
     cv2.putText(frame, f'{round(fps,1)}', (7, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
 
-    
+    # Resize frame to 1/4 of original size to speed up processing
     frameSmall = cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
+    # Convert the BGR frame captured by Opencv to RGB for processing with face recognition api
     frameRGB = cv2.cvtColor(frameSmall,cv2.COLOR_BGR2RGB)
+    # Detect the faces found in the frames of the video stream
     facePositions = fr.face_locations(frameRGB, model = MODEL)
+    # Convert all the face found in the video stream into Encodings 
     allEncoding = fr.face_encodings(frameRGB,facePositions)
+
+    # For each encoding of the detected faces, compare it with the list of known encodings (Face Recognition Process)
     for face_encoding in allEncoding:
         matches = fr.compare_faces(Encodings,face_encoding,tolerance = TOLERANCE)
+        # If detected face is unknown, name label is unknown
         name = "Unknown"
         acc =100
-        # check the known faces with the smallest distance to the new face
+        # Calculates the euclidean distance of the face detected with the known encodings
         face_distances = fr.face_distance(Encodings,face_encoding)
-        # Take the best one
+        # Retreive the best match index of face in face_distances list
         best_match_index = np.argmin(face_distances)
-        # Name of the best match face
-        # name = Names[best_match_index]
-        # Attendance(name)
         # Euclidean distance of best match index 
         Euclidean_dist_best_match = face_distances[best_match_index]
         if matches[best_match_index]:
+            # Name of the best match face 
             name = Names[best_match_index]
+            # Generate attendance data
+            # Attendance(name)
+            # List of known faces detected
             known_face_names.append(name)
             # Calculate accuracy of face detection
             conf = face_distance_to_conf(Euclidean_dist_best_match)
             acc = conf * 100
+        # Append the names of the detected face
         face_names.append(name)
+        
     # Display the number of known faces detected
-    cv2.putText(frame, f'Known_detected:{len(known_face_names)}', (500, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
+    cv2.putText(frame, f'Known_detected:{len(known_face_names)}', (400, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
     # Draw the bounding boxes around the identified faces
     for (top,right,bottom,left), name in zip(facePositions,face_names):
         top *= 4
