@@ -66,13 +66,13 @@ class Window(Frame):
         #text.pack()
 
 def inference(src):
-    os.system(f'inference.py -i "{src}"')
+    os.system(f'python3 inference.py -i "{src}"')
 
 def training():
-    os.system('Train_model.py')
+    os.system('python3 Train_model.py')
 
 def dataset(name,src):
-    os.system(f'build_face_dataset.py -o known_faces/{name} -i "{src}"')
+    os.system(f'python3 build_face_dataset.py -o known_faces/{name} -i "{src}"')
 
 
 
