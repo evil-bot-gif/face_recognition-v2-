@@ -33,28 +33,30 @@ def Attendance(name):
             dt = curr.strftime('%d/%b/%Y, %H:%M:%S')
             f.writelines(f'\n{name},{dt}')
 
+"""------------Main program--------------"""
+# Construct argparse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--input", required=True,
+	help="video src url or onboard camera")
+ap.add_argument("-d", "--detection-method", type=str, default="cnn",
+	help="face detection model to use: either `hog` or `cnn`")
+args = vars(ap.parse_args())
 
-"""------------Code-------------"""
 ## Global variables
 Encodings = []
 Names = []
 # Font for text display on screen during run time
 font = cv2.FONT_HERSHEY_DUPLEX
+# Video Input Source
+SRC=args["input"]
 # Face detection model (CNN or hog) used by face recognition api
-MODEL = 'cnn' 
+MODEL = args["detection_method"] 
 # Tune accuracy of face recognition api
 TOLERANCE = 0.4
 # used to record the time when we processed last frame 
 prev_frame_time = 0
 # used to record the time at which we processed current frame 
 new_frame_time = 0
-
-"""------------Main program--------------"""
-# Construct argparse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--input", required=True,
-	help="video src url or onboard camera")
-args = vars(ap.parse_args())
 
 # Load trained data
 with open('known_faces_feature.pkl','rb') as f:
@@ -63,7 +65,7 @@ with open('known_faces_feature.pkl','rb') as f:
 
 print('[INFO] starting video stream ......')
 # create a cam instance 
-cam = cv2.VideoCapture(args["input"]) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
+cam = cv2.VideoCapture(SRC) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 # check if the camera is open
 if not cam.isOpened():
     print("Cannot open camera")

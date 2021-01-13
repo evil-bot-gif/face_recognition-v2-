@@ -23,7 +23,7 @@ class Window(Frame):
         # Input field for user to enter the src 
         s = Entry(self,width=30,font=("Arial",10))
         s.pack(pady=3)
-        s.insert(0,"URL e.g.https://192.168.0.238/video")
+        s.insert(0,"http://151.192.128.132:18888/video")
 
 ############# Row 2 ###################
         # Step 1 instruction label 
@@ -37,7 +37,7 @@ class Window(Frame):
         # Input field for user to enter the path 
         n = Entry(self,width=25,font=("Arial",10))
         n.pack(pady=3)
-        n.insert(0,"e.g.xaiver_lim(replace ' ' to '_')")
+        n.insert(0,"xavier_lim")
 
 ############# Row 4 ###################        
         # Button to run build_face_dataset script

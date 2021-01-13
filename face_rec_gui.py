@@ -69,21 +69,21 @@ class Window(Frame):
 
 ############# Row 9 ###################
         # Button to run inference script
-        btn2 = Button(self, text="Run Inference", bg="red", fg="white",command=lambda:inference(s.get()))
+        btn2 = Button(self, text="Run Inference", bg="red", fg="white",command=lambda:inference(s.get(),m.get()))
         btn2.pack(pady=3)
         #text.pack()
 
-def inference(src):
-    os.system(f'inference.py -i "{src}"')
+def inference(src,model):
+    os.system(f'python3 inference.py -d {model} -i "{src}"')
 
 def training():
-    os.system('Train_model.py')
+    os.system('python3 Train_model.py')
 
 def dataset(name,model,src):
     if model == "":
-        os.system(f'build_face_dataset.py -o known_faces/{name} -i "{src}"')
+        os.system(f'python3 build_face_dataset.py -o known_faces/{name} -i "{src}"')
     else:
-        os.system(f'build_face_dataset.py -o known_faces/{name} -d {model} -i "{src}"')
+        os.system(f'python3 build_face_dataset.py -o known_faces/{name} -d {model} -i "{src}"')
 
 
 root = Tk()
