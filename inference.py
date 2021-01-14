@@ -25,7 +25,7 @@ Names = []
 # Font for text display on screen during run time
 font = cv2.FONT_HERSHEY_DUPLEX
 # Video Input Source
-SRC=args["input"]
+SRC= args["input"]
 # Face detection model (CNN or hog) used by face recognition api
 MODEL = args["detection_method"] 
 # Tune accuracy of face recognition api
@@ -72,6 +72,9 @@ while True:
     # if the frame is not grabbed, then we reach the end of stream
     if not ret:
         break
+
+    # Display instruction to close program at the screen
+    cv2.putText(frame,'Press q to quit.',(7,80), font, 0.75,(0,255,0),2,cv2.FILLED)
 
     # Calculate fps
     new_frame_time = time.time()   
