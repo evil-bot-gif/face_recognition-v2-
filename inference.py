@@ -9,29 +9,6 @@ import numpy as np
 from datetime import datetime
 import time 
 
-"""---------------Functions-----------------"""
-# Function that provides confidence level based on euclidean distance
-def face_distance_to_conf(face_distance, face_match_threshold=0.5):
-    if face_distance > face_match_threshold:
-        range = (1.0 - face_match_threshold)
-        linear_val = (1.0 - face_distance) / (range * 2.0)
-        return linear_val
-    else:
-        range = face_match_threshold
-        linear_val = 1.0 - (face_distance / (range * 2.0))
-        return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
-
-def Attendance(name):
-    with open('Attendance_Register.csv','r+') as f:
-        DataList = f.readlines()
-        names = []
-        for data in DataList:
-            ent = data.split(',')
-            names.append(ent[0])
-        if name not in names:
-            curr = datetime.now()
-            dt = curr.strftime('%d/%b/%Y, %H:%M:%S')
-            f.writelines(f'\n{name},{dt}')
 
 """------------Main program--------------"""
 # Construct argparse and parse the arguments
@@ -58,12 +35,24 @@ prev_frame_time = 0
 # used to record the time at which we processed current frame 
 new_frame_time = 0
 
+"""---------------Functions-----------------"""
+# Function that calculates confidence level(acc) based on euclidean distance
+def face_distance_to_conf(face_distance, face_match_threshold=TOLERANCE):
+    if face_distance > face_match_threshold:
+        range = (1.0 - face_match_threshold)
+        linear_val = (1.0 - face_distance) / (range * 2.0)
+        return linear_val
+    else:
+        range = face_match_threshold
+        linear_val = 1.0 - (face_distance / (range * 2.0))
+        return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
+
 # Load trained data
 with open('known_faces_feature.pkl','rb') as f:
     Encodings = pickle.load(f)
     Names= pickle.load(f)
 
-print('[INFO] starting video stream ......')
+print('\n[INFO] starting video stream ......')
 # create a cam instance 
 cam = cv2.VideoCapture(SRC) # ip webcam: https://192.168.0.238:4747/video (home) https://192.168.0.238:8080/video (5G router) https://192.168.0.40:18888/video (5G cellular network)
 # check if the camera is open
@@ -105,6 +94,7 @@ while True:
         matches = fr.compare_faces(Encodings,face_encoding,tolerance = TOLERANCE)
         # If detected face is unknown, name label is unknown
         name = "Unknown"
+        # Default acc of face recognition for unknown
         acc =100
         # Calculates the euclidean distance of the face detected with the known encodings
         face_distances = fr.face_distance(Encodings,face_encoding)
@@ -112,14 +102,13 @@ while True:
         best_match_index = np.argmin(face_distances)
         # Euclidean distance of best match index 
         Euclidean_dist_best_match = face_distances[best_match_index]
+
         if matches[best_match_index]:
             # Name of the best match face 
             name = Names[best_match_index]
-            # Generate attendance data
-            # Attendance(name)
             # List of known faces detected
             known_face_names.append(name)
-            # # Calculate accuracy of face detection
+            # Calculate accuracy of face detection
             conf = face_distance_to_conf(Euclidean_dist_best_match)
             acc = conf * 100
         # Append the names of the detected face
@@ -145,6 +134,5 @@ while True:
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
-# print(attendance)
 cam.release()
 cv2.destroyAllWindows()
