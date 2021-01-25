@@ -29,7 +29,7 @@ SRC= args["input"]
 # Face detection model (CNN or hog) used by face recognition api
 MODEL = args["detection_method"] 
 # Tune accuracy of face recognition api
-TOLERANCE = 0.4
+TOLERANCE = 0.5
 # used to record the time when we processed last frame 
 prev_frame_time = 0
 # used to record the time at which we processed current frame 
@@ -129,7 +129,7 @@ while True:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         y = top - 15 if top -15 > 15 else top + 15
         cv2.putText(frame,name.title(),(left,y),font,0.5,(0,255,0),2)
-        # # display the acc the accuracy 
+        # display the acc the accuracy 
         cv2.putText(frame, f'{round(acc,1)}%', (right, y), font, 0.5, (0, 255, 0), 2)
     # Output the frame 
     cv2.imshow('Live Video',frame)

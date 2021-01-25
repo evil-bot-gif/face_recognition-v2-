@@ -48,7 +48,7 @@ while True:
     # Instruction to take picture and quit 
     cv2.putText(frame, f'Press "k" to take snapeshot.', (7, 40), font, 0.75, (0, 255, 125), 2, cv2.FILLED)
     cv2.putText(frame, f'Press "q" to quit.', (7, 80), font, 0.75, (0, 255, 125), 2, cv2.FILLED)
-    cv2.putText(frame, f'Image taken:{total}', (540, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
+    cv2.putText(frame, f'Image taken:{total}', (520, 40), font, 0.75, (0, 255, 0), 2, cv2.FILLED)
     
     # Resize frame to 1/4 of original size to speed up processing
     frameSmall = cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
