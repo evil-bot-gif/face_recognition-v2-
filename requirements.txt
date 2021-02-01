@@ -1,7 +1,6 @@
+scikit-build
 cmake
 dlib
 face_recognition
 numpy
-opencv-python
 imutils
-python-tk

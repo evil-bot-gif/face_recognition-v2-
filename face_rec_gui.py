@@ -15,7 +15,7 @@ class Window(Frame):
 
         # Image icon for face rec gui
 
-        image1 = Image.open("icon.png")
+        image1 = Image.open('face_rec_icon.png')
         image1 = image1.resize((50,50),Image.ANTIALIAS)
         i = ImageTk.PhotoImage(image1)
         icon = Label(image=i)
@@ -71,7 +71,7 @@ def inference(src):
     os.system(f'python3 inference.py -i "{src}"')
 
 def generate():
-    os.system('python3 Generate_encodings.py')
+    os.system('python3 generate_encodings.py')
 
 def dataset(name,src):
     os.system(f'python3 build_face_dataset.py -o known_faces/"{name}" -i "{src}"')

@@ -65,6 +65,7 @@ while True:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2 )
     # show the output frame 
     cv2.imshow("Snapshot",frame)
+    cv2.moveWindow('Snapshot',800,450)
     key = cv2.waitKey(1) & 0xFF
 
     # if the 'k' key was pressed, write the "original" frame to disk
